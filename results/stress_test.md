@@ -112,3 +112,69 @@ All detectors except Nirikshak were trained or calibrated on `data/sim/train.par
 | intercept 4/16 rounds | 10% | 100% | 100% | 100% | 100% | 100% |
 | intercept 8/16 rounds | 95% | 100% | 100% | 100% | 100% | 100% |
 | entangling probe (all) | 35% | 100% | 100% | 100% | 100% | 98% |
+
+## hardware: ibm_kingston batch 8 (timing matched, spin echo)
+
+| Condition | 11% rule | sim-calibrated threshold | Random Forest (sim-trained) | XGBoost (sim-trained) | XGBoost + reference features | Nirikshak |
+| :--- | :-: | :-: | :-: | :-: | :-: | :-: |
+| honest (false alarms) | 0% | 2% | 2% | 6% | 7% | 4% |
+| intercept 1/16 rounds | 0% | 60% | 60% | 65% | 70% | 70% |
+| intercept 2/16 rounds | 0% | 90% | 90% | 90% | 90% | 95% |
+| intercept 4/16 rounds | 20% | 100% | 100% | 100% | 100% | 100% |
+| intercept 8/16 rounds | 90% | 100% | 100% | 100% | 100% | 100% |
+| entangling probe (all) | 3% | 100% | 100% | 100% | 100% | 100% |
+
+## hardware: ibm_fez batch 9 (timing matched, spin echo)
+
+| Condition | 11% rule | sim-calibrated threshold | Random Forest (sim-trained) | XGBoost (sim-trained) | XGBoost + reference features | Nirikshak |
+| :--- | :-: | :-: | :-: | :-: | :-: | :-: |
+| honest (false alarms) | 0% | 38% | 38% | 40% | 14% | 9% |
+| intercept 1/16 rounds | 0% | 60% | 55% | 60% | 50% | 45% |
+| intercept 2/16 rounds | 0% | 95% | 95% | 95% | 95% | 95% |
+| intercept 4/16 rounds | 5% | 100% | 100% | 100% | 100% | 100% |
+| intercept 8/16 rounds | 85% | 100% | 100% | 100% | 100% | 100% |
+| entangling probe (all) | 0% | 100% | 97% | 97% | 83% | 48% |
+
+## hardware: ibm_marrakesh batch 10 (timing matched, spin echo)
+
+| Condition | 11% rule | sim-calibrated threshold | Random Forest (sim-trained) | XGBoost (sim-trained) | XGBoost + reference features | Nirikshak |
+| :--- | :-: | :-: | :-: | :-: | :-: | :-: |
+| honest (false alarms) | 0% | 99% | 98% | 98% | 19% | 4% |
+| intercept 1/16 rounds | 0% | 100% | 100% | 100% | 80% | 60% |
+| intercept 2/16 rounds | 0% | 100% | 100% | 100% | 95% | 85% |
+| intercept 4/16 rounds | 40% | 100% | 100% | 100% | 95% | 95% |
+| intercept 8/16 rounds | 95% | 100% | 100% | 100% | 100% | 100% |
+| entangling probe (all) | 0% | 100% | 100% | 100% | 97% | 82% |
+
+## hardware: ibm_kingston batch 11 (timing matched, spin echo)
+
+| Condition | 11% rule | sim-calibrated threshold | Random Forest (sim-trained) | XGBoost (sim-trained) | XGBoost + reference features | Nirikshak |
+| :--- | :-: | :-: | :-: | :-: | :-: | :-: |
+| honest (false alarms) | 0% | 3% | 4% | 4% | 7% | 6% |
+| intercept 1/16 rounds | 0% | 55% | 55% | 60% | 70% | 65% |
+| intercept 2/16 rounds | 0% | 90% | 90% | 90% | 90% | 90% |
+| intercept 4/16 rounds | 10% | 100% | 100% | 100% | 100% | 100% |
+| intercept 8/16 rounds | 80% | 100% | 100% | 100% | 100% | 100% |
+| entangling probe (all) | 10% | 100% | 100% | 100% | 100% | 100% |
+
+## hardware: ibm_fez batch 12 (timing matched, spin echo)
+
+| Condition | 11% rule | sim-calibrated threshold | Random Forest (sim-trained) | XGBoost (sim-trained) | XGBoost + reference features | Nirikshak |
+| :--- | :-: | :-: | :-: | :-: | :-: | :-: |
+| honest (false alarms) | 0% | 32% | 34% | 36% | 13% | 4% |
+| intercept 1/16 rounds | 0% | 85% | 75% | 80% | 55% | 20% |
+| intercept 2/16 rounds | 0% | 100% | 100% | 100% | 95% | 95% |
+| intercept 4/16 rounds | 20% | 100% | 100% | 100% | 100% | 100% |
+| intercept 8/16 rounds | 90% | 100% | 100% | 100% | 100% | 100% |
+| entangling probe (all) | 0% | 95% | 93% | 93% | 88% | 57% |
+
+## hardware: ibm_marrakesh batch 13 (timing matched, spin echo)
+
+| Condition | 11% rule | sim-calibrated threshold | Random Forest (sim-trained) | XGBoost (sim-trained) | XGBoost + reference features | Nirikshak |
+| :--- | :-: | :-: | :-: | :-: | :-: | :-: |
+| honest (false alarms) | 0% | 98% | 96% | 96% | 20% | 5% |
+| intercept 1/16 rounds | 0% | 95% | 100% | 100% | 60% | 15% |
+| intercept 2/16 rounds | 0% | 100% | 100% | 100% | 85% | 20% |
+| intercept 4/16 rounds | 50% | 100% | 100% | 100% | 100% | 100% |
+| intercept 8/16 rounds | 100% | 100% | 100% | 100% | 100% | 100% |
+| entangling probe (all) | 2% | 100% | 100% | 100% | 80% | 77% |

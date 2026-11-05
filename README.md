@@ -1,88 +1,81 @@
 <div align="center">
 
-# Essential Engineers: Nirikshak
+# Nirikshak
 
-**VTU-QFF-HC-0173** &nbsp;|&nbsp; Tier: **Both**
+**Drift-robust eavesdropper detection for BB84 quantum key distribution, tested on real quantum hardware.**
 
-**Nirikshak** ("inspector"): catching real eavesdroppers on real quantum hardware.
-A hardware-in-the-loop stress test and drift-robust eavesdropper detector for BB84
-Quantum Key Distribution (QKD), built with Qiskit and run on IBM Quantum hardware.
-
-**Result on `ibm_kingston`:** across three batches 22 hours apart, Nirikshak flagged all 21
-attacked sessions (p ≤ 0.0002), including an eavesdropper touching 1 of 16 rounds, and none of
-the 9 honest ones. The textbook 11% rule caught only the largest attack, and BB84 would have kept
-producing keys through the rest. On two more machines it caught every attack with no retuning:
-7 of 7 on the noisier `ibm_marrakesh` (honest QBER 3.6%), where detectors trained in simulation
-flagged 78-83% of honest blocks, and 7 of 7 on `ibm_fez` (2.0%). Across all three machines:
-35 of 35 attacked sessions flagged, 0 of 15 honest ones. Trained detectors flagged up to 88% of
-honest blocks once noise shifted.
+[![tests](https://github.com/dipankarchettri/nirikshak/actions/workflows/tests.yml/badge.svg)](https://github.com/dipankarchettri/nirikshak/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
+![Qiskit 2.6](https://img.shields.io/badge/qiskit-2.6-6929C4.svg)
 
 </div>
 
----
+**Nirikshak** ("inspector") tells an eavesdropper apart from ordinary hardware drift on a QKD link.
+In every run it measures the device's honest noise with reference rounds that never cross the
+channel, then asks one question with an exact statistical test: are the key rounds noisier than
+the reference rounds? The false-alarm rate is fixed in advance (5%) at any noise level, and
+attacks far below the 11% QBER limit are caught.
+
+**Results on three IBM Heron r2 processors** (`ibm_kingston`, `ibm_fez`, `ibm_marrakesh`, eleven
+batches from 21 Oct to 3 Nov 2026, no retuning between machines): Nirikshak flagged **all 77
+attacked sessions**, including an eavesdropper touching only 1 of 16 rounds on every batch, and
+**4 of 75 honest sessions (5.3%)**, in line with its 5% false-alarm budget. The textbook 11% rule
+missed every attack on 1 or 2 of 16 rounds, and BB84 would have kept producing keys through them.
+When the noise shifted, detectors trained in simulation flagged up to 99% of honest blocks
+(`ibm_marrakesh`, honest QBER 4.7%); Nirikshak flagged 4%.
 
 <div align="center">
 
-| | |
-| :--- | :--- |
-| **Project** | Nirikshak |
-| **Team** | Essential Engineers |
-| **Team ID** | VTU-QFF-HC-0173 |
-| **Tier** | Both |
-| **Track** | Track 1: Quantum Cryptography & Security |
-| **Repository** | [vtu-hc-essential-engineers](https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-essential-engineers.git) |
-| **Organisation** | [vtu-qiskit-fall-fest-2026](https://github.com/vtu-qiskit-fall-fest-2026) |
-| **Event** | VTU-QFF Hackathon, VTU-Qiskit Fall Fest 2026 |
-| **Demo video** | [youtu.be/gO9v1e-yHNs](https://youtu.be/gO9v1e-yHNs) (4:46) |
-| **Live app** | [vtu-qiskit-fall-fest-2026.github.io/vtu-hc-essential-engineers](https://vtu-qiskit-fall-fest-2026.github.io/vtu-hc-essential-engineers/) |
-| **Slides** | [PDF](docs/VTU-QFF-HC-0173.pdf) · [PPTX](docs/VTU-QFF-HC-0173.pptx) |
-
-<a href="https://vtu-qiskit-fall-fest-2026.github.io/vtu-hc-essential-engineers/"><img src="docs/web_app.png" alt="Nirikshak web app: real ibm_kingston attacks against the 11% rule" width="49%"></a>
+<a href="https://dipankarchettri.github.io/nirikshak/"><img src="docs/web_app.png" alt="Nirikshak web app: real ibm_kingston attacks against the 11% rule" width="49%"></a>
 <a href="https://youtu.be/gO9v1e-yHNs"><img src="https://img.youtube.com/vi/gO9v1e-yHNs/maxresdefault.jpg" alt="Watch the 4:46 demo video" width="49%"></a>
 
-*Left: the live app (every marker is a real attack on `ibm_kingston`). Right: the full demo video on YouTube.*
+*Left: the [live app](https://dipankarchettri.github.io/nirikshak/) (every marker is a real attack on `ibm_kingston`). Right: the [demo video](https://youtu.be/gO9v1e-yHNs) (4:46).*
 
 </div>
-
-**Watch here:** the first two minutes of the demo (the problem, how Nirikshak works, the results). The full
-4:46 video, including the tour of the app, is on [YouTube](https://youtu.be/gO9v1e-yHNs).
 
 https://github.com/user-attachments/assets/1529200a-6800-448d-9514-07f3fd6f8d55
 
 ---
 
+## Quick start
+
+```bash
+git clone https://github.com/dipankarchettri/nirikshak.git
+cd nirikshak
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+python -m src.main --demo         # 1 minute: an honest and an attacked session on the simulator
+```
+
+No IBM account is needed: the hardware data is in the repository. See [How to run](#how-to-run)
+for the full pipeline, the dashboard, the network monitor and IBM hardware runs.
+
+---
+
 ## Table of Contents
 
-- [Team Members](#team-members-github-ids)
-- [Problem Statement](#problem-statement)
-- [Proposed Solution](#proposed-solution)
-- [Approach & Architecture](#approach--architecture)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [How to Run](#how-to-run)
-- [How to Push Code](#how-to-push-code)
+- [The problem](#the-problem)
+- [How Nirikshak works](#how-nirikshak-works)
+- [Architecture](#architecture)
+- [Tech stack](#tech-stack)
+- [Project structure](#project-structure)
+- [How to run](#how-to-run)
 - [Results](#results)
-- [Reproduce the Results](#reproduce-the-results)
-- [Hardware Budget](#hardware-budget)
-- [Submission Checklist](#submission-checklist)
+- [Reproduce the results](#reproduce-the-results)
+- [Running on IBM hardware: budget](#running-on-ibm-hardware-budget)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Citing Nirikshak](#citing-nirikshak)
+- [Authors and history](#authors-and-history)
 - [Resources](#resources)
 - [License](#license)
 
 ---
 
-## Team Members (GitHub IDs)
+## The problem
 
-| # | Name | GitHub Username | Role |
-| :-- | :--- | :--- | :--- |
-| 1 | J Bhuvanesh | [@Bhuvan-esh](https://github.com/Bhuvan-esh) | Team Lead |
-| 2 | Dipankar Chettri | [@dipankarchettri](https://github.com/dipankarchettri) | Developer |
-| 3 | Anusha A | [@anusha1234-dot](https://github.com/anusha1234-dot) | Developer |
-
----
-
-## Problem Statement
-
-**Problem:** Eavesdropper detectors for QKD are trained and tested almost entirely in
+Eavesdropper detectors for QKD are trained and tested almost entirely in
 simulation. Nobody has measured whether they can tell normal hardware drift from a real
 attack on real quantum hardware, so deployed QKD links risk false alarms that discard
 valid keys, or eavesdroppers who go undetected.
@@ -103,13 +96,11 @@ valid keys, or eavesdroppers who go undetected.
   (ANSSI, BSI, NLNCSA, Swedish NCSA) state QKD is not yet mature from a security
   perspective.
 
-**Track / Category:** Both (hybrid) · Track 1 · Quantum Cryptography & Security
-
 ---
 
-## Proposed Solution
+## How Nirikshak works
 
-**Solution:** We run honest BB84 sessions and qubit-level attacks on IBM Quantum hardware,
+We run honest BB84 sessions and qubit-level attacks on IBM Quantum hardware,
 stress-test widely used eavesdropper detectors that were trained in simulation against
 that hardware data, and build a detector that stays calibrated under device drift. The
 outputs are an open dataset of hardware BB84 attack logs, a reusable scorecard, and a
@@ -139,7 +130,7 @@ blocks against reference blocks gives one verdict (attack or clean) with a p-val
 
 ---
 
-## Approach & Architecture
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -170,7 +161,7 @@ flowchart LR
 
 ---
 
-## Tech Stack
+## Tech stack
 
 | Layer | Technology |
 | :--- | :--- |
@@ -187,17 +178,17 @@ flowchart LR
 
 ---
 
-## Project Structure
+## Project structure
 
 ```text
-vtu-hc-essential-engineers/
+nirikshak/
 ├── README.md
 ├── LICENSE
 ├── pyproject.toml           # package metadata and dependencies
 ├── requirements.txt         # pinned direct dependencies (pip install -r)
 ├── requirements.lock        # full tested environment (Linux, Python 3.12)
 ├── .env.example             # IBM credential template (copy to .env)
-├── .github/workflows/       # CI: pytest on every push
+├── .github/                 # CI (tests, Pages), issue and PR templates
 ├── src/main.py              # end-to-end entry point (python -m src.main)
 ├── nirikshak/
 │   ├── protocol/            # BB84 parameterized templates, sifting, QBER
@@ -225,18 +216,19 @@ vtu-hc-essential-engineers/
 │   ├── export_web.py        # results as JSON for the web frontend
 │   └── hardware_lessons.py  # per-batch honest / touched / untouched QBER from raw bits
 ├── results/                 # scorecard, stress test, sessions.csv, hardware_lessons.csv, figures/
-├── docs/                    # slides (PDF, PPTX) and the web app screenshot
+├── docs/                    # web app screenshot; hackathon/ holds the original slides and dossier
 ├── tests/                   # pytest suite
 ├── data/hardware/           # hardware block datasets (one parquet per job)
 ├── data/sim/                # simulated block datasets (train, test, drift, kingston, honest-only)
 ├── data/raw/                # raw bits and job metadata (git-ignored)
 ├── notebooks/walkthrough.ipynb  # guided tour on the committed data (outputs cleared)
-└── PROJECT.md               # full design document
+├── CONTRIBUTING.md
+└── CITATION.cff
 ```
 
 ---
 
-## How to Run
+## How to run
 
 ### Prerequisites
 
@@ -247,8 +239,8 @@ vtu-hc-essential-engineers/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-essential-engineers.git
-cd vtu-hc-essential-engineers
+git clone https://github.com/dipankarchettri/nirikshak.git
+cd nirikshak
 ```
 
 ### 2. Create a virtual environment and install
@@ -300,7 +292,7 @@ Pages: hardware results, network monitor (replays a day of link verdicts), stres
 works with a simulator. Needs Node 20 or newer. The data comes from `python scripts/export_web.py`
 (run by `python -m src.main`; add `--sim` to regenerate the simulator grid). On every push to
 `main` that touches `web/`, `.github/workflows/pages.yml` publishes it to GitHub Pages:
-<https://vtu-qiskit-fall-fest-2026.github.io/vtu-hc-essential-engineers/>.
+<https://dipankarchettri.github.io/nirikshak/>.
 
 ### 5. Optional: IBM Quantum hardware
 
@@ -322,64 +314,6 @@ python scripts/hw_smoke.py --submit  # real job, about 3 s of quantum time
 
 ---
 
-## How to Push Code
-
-> Full walkthrough: **[Git & Collaboration Handbook](../vtu-hc-guide-git-and-collaboration)**.
-> Only the final commit on `main` at the deadline is judged.
-
-### Configure Git (first time only, in this repository)
-
-```bash
-git config user.name  "Your Name"
-git config user.email "you@example.com"
-```
-
-### Everyday workflow
-
-```bash
-# 1. Get the latest changes
-git checkout main
-git pull origin main
-
-# 2. Create a branch for your work
-git checkout -b feature/my-task
-
-# 3. Commit your work
-git add .
-git commit -m "feat: describe the change"
-
-# 4. Push the branch
-git push -u origin feature/my-task
-
-# 5. Open a Pull Request on GitHub and request a review
-#    https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-essential-engineers/compare/main...feature/my-task
-
-# 6. After approval, merge into main
-git checkout main
-git pull origin main
-git branch -d feature/my-task
-```
-
-### Commit message convention
-
-| Prefix | Meaning |
-| :--- | :--- |
-| `feat:` | New feature |
-| `fix:` | Bug fix |
-| `docs:` | Documentation only |
-| `test:` | Adding or fixing tests |
-| `refactor:` | Code restructure, no behaviour change |
-| `chore:` | Build/config/dependency changes |
-
-### Collaborating on the same repo
-
-- **Never push directly to `main`**: open a Pull Request.
-- **Pull before you push** to avoid rejected commits.
-- **Never commit `.env`** or any API key.
-- **Ask for a review** before merging.
-
----
-
 ## Results
 
 All numbers state the backend that produced them; brackets are exact 95% intervals
@@ -394,65 +328,98 @@ Nirikshak gives two outputs per session (20 key blocks + 20 reference blocks):
   session's reference blocks (split-conformal). About 5% of honest blocks on average, more in
   some sessions, since the threshold rests on 20 reference blocks.
 
-### Real hardware: `ibm_kingston`, batches 3-5 (spin echo, 21 Oct 21:15 to 22 Oct 19:00)
+### Real hardware: three machines, eleven batches
+
+Batches 3-13 all use matched timing with a spin echo. Batches 3-7 (21-23 Oct) hold 3 honest and 7
+attacked sessions each; batches 8-13 (3 Nov) hold 10 honest and 7 attacked, and batches 11-13 run
+the reference circuits first in every second session (see below). Same circuits and detector
+settings on every machine, nothing retuned.
+
+| | `ibm_kingston` | `ibm_fez` | `ibm_marrakesh` |
+| :--- | :-: | :-: | :-: |
+| Batches | 3, 4, 5, 8, 11 | 6, 9, 12 | 7, 10, 13 |
+| Honest QBER | 1.4-1.9% | 1.9-3.1% | 3.5-5.3% |
+| Attacked sessions flagged | **35 of 35** | **21 of 21** | **21 of 21** |
+| Honest sessions flagged | **0 of 29** | **3 of 23** | **1 of 23** |
+| Honest blocks flagged | 5% (3%-7%) | 7% (5%-9%) | 4% (3%-7%) |
+| Largest p-value of an attacked session | 0.0002 | 0.0008 | 0.0080 |
+
+**All machines: 77 of 77 attacked sessions flagged (95%-100%), 4 of 75 honest sessions (5.3%,
+1.5%-13.1%).** The four honest flags (`ibm_fez` batches 9 and 12, p = 0.020, 0.048, 0.016;
+`ibm_marrakesh` batch 13, p = 0.043) are what a 5% budget predicts: about 3.75 of 75.
 
 ![Blocks flagged on ibm_kingston](results/figures/detection.png)
 
-| Condition (3 sessions each) | Key QBER | BB84 key rate | Session verdict | Nirikshak, per block | 11% rule, per block |
-| :--- | :-: | :-: | :-: | :-: | :-: |
-| Honest | 1.7-1.9% | 0.73-0.76 | **0 of 9 flagged** | 4% (2%-9%) | 0% |
-| Intercept-resend, 1 of 16 rounds | 3.0-3.2% | 0.59-0.61 | **3 of 3** | 47% (34%-60%) | 0% |
-| Intercept-resend, 2 of 16 rounds | 4.8-5.1% | 0.42-0.45 | **3 of 3** | 90% (79%-96%) | 0% |
-| Intercept-resend, 4 of 16 rounds | 7.8-8.5% | 0.16-0.21 | **3 of 3** | 100% (94%-100%) | 12% |
-| Intercept-resend, 8 of 16 rounds | 14.2-15.4% | 0 (abort) | **3 of 3** | 100% (94%-100%) | 95% |
-| Entangling probe (3 settings) | 3.7-5.5% | 0.39-0.55 | **9 of 9** | 62-98% | 0% |
+`ibm_kingston`, batches 3, 4, 5, 8 and 11 (5 sessions per attack condition, 29 honest):
 
-- All 21 attacked sessions: 100% flagged (84%-100%), every p-value ≤ 0.0002. Honest sessions:
-  0 of 9 (0%-34%; nine sessions cannot pin the rate down further, see simulation below).
-- Key rate is the asymptotic BB84 rate `1 - 2h(QBER)` per sifted bit. For every attack except
-  8 of 16 it stays positive: the protocol would keep making keys and never report the
-  eavesdropper. That is the gap Nirikshak fills.
+| Condition | Key QBER | BB84 key rate | Session verdict | Nirikshak, per block | 11% rule, per block |
+| :--- | :-: | :-: | :-: | :-: | :-: |
+| Honest | 1.4-1.9% | 0.73-0.79 | **0 of 29 flagged** | 5% (3%-7%) | 0% |
+| Intercept-resend, 1 of 16 rounds | 2.9-3.2% | 0.59-0.62 | **5 of 5** | 55% (45%-65%) | 0% |
+| Intercept-resend, 2 of 16 rounds | 4.5-5.1% | 0.42-0.47 | **5 of 5** | 91% (84%-96%) | 0% |
+| Intercept-resend, 4 of 16 rounds | 7.8-8.5% | 0.16-0.21 | **5 of 5** | 100% (96%-100%) | 13% |
+| Intercept-resend, 8 of 16 rounds | 14.2-15.4% | 0 (abort) | **5 of 5** | 100% (96%-100%) | 91% |
+| Entangling probe (3 settings) | 3.7-9.5% | 0.09-0.55 | **15 of 15** | 77-99% | 0-4% |
+
+`ibm_fez`, batches 6, 9 and 12 (3 sessions per attack condition, 23 honest):
+
+| Condition | Key QBER | BB84 key rate | Session verdict | Nirikshak, per block | 11% rule, per block |
+| :--- | :-: | :-: | :-: | :-: | :-: |
+| Honest | 1.9-3.1% | 0.60-0.73 | **3 of 23 flagged** | 7% (5%-9%) | 0% |
+| Intercept-resend, 1 of 16 rounds | 3.2-3.8% | 0.54-0.59 | **3 of 3** | 33% (22%-47%) | 0% |
+| Intercept-resend, 2 of 16 rounds | 5.2-5.8% | 0.36-0.41 | **3 of 3** | 95% (86%-99%) | 0% |
+| Intercept-resend, 4 of 16 rounds | 7.6-9.3% | 0.11-0.22 | **3 of 3** | 100% (94%-100%) | 10% |
+| Intercept-resend, 8 of 16 rounds | 13.5-14.9% | 0 (abort) | **3 of 3** | 100% (94%-100%) | 87% |
+| Entangling probe (3 settings) | 4.3-6.0% | 0.34-0.49 | **9 of 9** | 40-75% | 0% |
+
+`ibm_marrakesh`, batches 7, 10 and 13 (3 sessions per attack condition, 23 honest):
+
+| Condition | Key QBER | BB84 key rate | Session verdict | Nirikshak, per block | 11% rule, per block |
+| :--- | :-: | :-: | :-: | :-: | :-: |
+| Honest | 3.5-5.3% | 0.40-0.56 | **1 of 23 flagged** | 4% (3%-7%) | 0% |
+| Intercept-resend, 1 of 16 rounds | 4.9-6.1% | 0.34-0.43 | **3 of 3** | 27% (16%-40%) | 0% |
+| Intercept-resend, 2 of 16 rounds | 7.0-7.8% | 0.21-0.27 | **3 of 3** | 63% (50%-75%) | 0% |
+| Intercept-resend, 4 of 16 rounds | 9.5-11.0% | 0-0.10 | **3 of 3** | 98% (91%-100%) | 33% |
+| Intercept-resend, 8 of 16 rounds | 15.0-15.7% | 0 (abort) | **3 of 3** | 100% (94%-100%) | 97% |
+| Entangling probe (3 settings) | 5.3-11.4% | 0-0.40 | **9 of 9** | 67-98% | 3-20% |
+
+- Key rate is the asymptotic BB84 rate `1 - 2h(QBER)` per sifted bit. Every attack on 1 or 2 of
+  16 rounds leaves it positive on every machine: the protocol would keep making keys and never
+  report the eavesdropper. That is the gap Nirikshak fills.
+- The 1 of 16 attack in `ibm_marrakesh` batch 7 shows why the session verdict is the decision:
+  only 1 of its 20 blocks crossed the block threshold, but pooling all 20 against the reference
+  blocks still flagged the session (p = 0.0035).
+- The machines drifted in 12 days: honest QBER on `ibm_fez` rose from 2.0% to 2.5% and on
+  `ibm_marrakesh` from 3.6% to 4.7%, while `ibm_kingston` stayed at 1.6-1.8%. The entangling probe
+  on `ibm_kingston` caused much larger errors in November (6.7-9.5% against 3.7-5.5%), a sign that
+  part of what is detected is Eve's own noisy two-qubit gates.
 
 ![Honest QBER over time](results/figures/drift.png)
 
-Honest QBER stayed at 1.7-1.9% over 22 hours, and in every session the reference rounds sat
-within 0.2 points of the key rounds, which is what lets them calibrate the alarm.
+In every honest session the reference rounds tracked the key rounds: 71 of 75 within 0.5 points,
+all within 0.61 points, from 1.4% on `ibm_kingston` to 5.3% on `ibm_marrakesh`. That is what lets
+them calibrate the alarm.
 
-### Second machine: `ibm_marrakesh`, batch 7 (job `dbd3bts24mrc73cklb10`, 22 Oct 21:42)
+### Honest key rounds sit slightly above the reference
 
-Same circuits, same detector settings, nothing retuned. Marrakesh is twice as noisy (honest QBER
-3.5-3.9%, reference rounds 3.4-3.8%), and its two-qubit gates make the entangling probe much more
-visible.
+Over the 75 honest sessions, key-round QBER is on average 0.057 points above reference-round QBER
+(standard deviation 0.23; t-test p = 0.038, Wilcoxon p = 0.014), and 49 of the 75 honest p-values
+are below 0.5 (Kolmogorov-Smirnov p = 0.018 against uniform). Honest key and reference circuits
+compile to identical circuits, so a candidate cause is order: until batch 10, every session ran its
+key circuits before its reference circuits. Batches 11-13 (`scripts/collect.py --order alternate`)
+ran the reference first in every second session:
 
-| Condition | Key QBER | BB84 key rate | Session verdict | Nirikshak, per block | 11% rule, per block |
-| :--- | :-: | :-: | :-: | :-: | :-: |
-| Honest (3 sessions) | 3.5-3.9% | 0.52-0.56 | **0 of 3 flagged** | 3% (0%-12%) | 0% |
-| Intercept-resend, 1 of 16 rounds | 4.9% | 0.43 | **attack**, p = 0.0035 | 5% | 0% |
-| Intercept-resend, 2 of 16 rounds | 7.0% | 0.27 | **attack** | 85% | 0% |
-| Intercept-resend, 4 of 16 rounds | 9.5% | 0.10 | **attack** | 100% | 10% |
-| Intercept-resend, 8 of 16 rounds | 15.0% | 0 (abort) | **attack** | 100% | 95% |
-| Entangling probe (3 settings) | 7.6-11.4% | 0-0.22 | **attack** (3 of 3) | 95-100% | 10-55% |
+| Batches 11-13, honest sessions | Sessions | Key minus reference |
+| :--- | :-: | :-: |
+| Key circuits first | 15 | +0.10 points |
+| Reference circuits first | 15 | -0.01 points |
 
-The 1 of 16 attack shows why the session verdict is the decision: on a noisier machine only 1 of
-its 20 blocks crossed the block threshold, but pooling all 20 against the reference blocks still
-flagged the session.
-
-### Third machine: `ibm_fez`, batch 6 (job `dbd104pgv2cc738h5m80`, submitted 22 Oct 19:01, ran 23 Oct 01:16)
-
-Same circuits and settings, nothing retuned. Fez's noise floor (honest QBER 1.9-2.2%, reference
-rounds 1.8-2.0%) is close to kingston's.
-
-| Condition | Key QBER | BB84 key rate | Session verdict | Nirikshak, per block | 11% rule, per block |
-| :--- | :-: | :-: | :-: | :-: | :-: |
-| Honest (3 sessions) | 1.9-2.2% | 0.70-0.73 | **0 of 3 flagged** | 8% (3%-18%) | 0% |
-| Intercept-resend, 1 of 16 rounds | 3.2% | 0.59 | **attack**, p = 0.0004 | 35% | 0% |
-| Intercept-resend, 2 of 16 rounds | 5.2% | 0.41 | **attack** | 95% | 0% |
-| Intercept-resend, 4 of 16 rounds | 7.6% | 0.22 | **attack** | 100% | 5% |
-| Intercept-resend, 8 of 16 rounds | 13.5% | 0 (abort) | **attack** | 100% | 85% |
-| Entangling probe (3 settings) | 4.3-5.7% | 0.37-0.49 | **attack** (3 of 3) | 35-90% | 0% |
-
-Here the noise matches the simulation, so the sim-trained detectors also behave (5-10% honest
-blocks flagged); Nirikshak needed no such luck on any of the three machines.
+The direction fits the order explanation, but the difference is not significant (p = 0.23), and
+the machines disagree: the gap flips on `ibm_marrakesh` (+0.23 vs -0.21), stays positive on
+`ibm_fez` (+0.07, +0.15) and is near zero on `ibm_kingston`. The offset is about a twenty-fifth of
+the smallest attack's effect (about 1.4 points on `ibm_kingston`), and the session false-alarm rate
+(5.3%) matches the budget. Until the cause is known, randomising the order in every run is the
+safe choice.
 
 ### Simulation: does the session verdict keep its 5% budget?
 
@@ -467,20 +434,22 @@ blocks flagged); Nirikshak needed no such luck on any of the three machines.
 
 Every detector except Nirikshak is trained or calibrated on simulated data
 (`data/sim/train.parquet`) for 5% false alarms per block, then tested on drifted simulation, a
-Kingston noise snapshot and six hardware batches on three machines.
+Kingston noise snapshot and all thirteen hardware batches on three machines.
 
 | Detector | False alarms per block, worst test set | Where |
 | :--- | :-: | :--- |
-| Sim-calibrated QBER threshold | 88% | drifted simulation |
-| Random Forest (sim-trained) | 87% | real hardware, batch 2 |
-| XGBoost (sim-trained) | 88% | real hardware, batch 2 |
+| Sim-calibrated QBER threshold | 99% | real hardware, `ibm_marrakesh` batch 10 |
+| Random Forest (sim-trained) | 98% | real hardware, `ibm_marrakesh` batch 10 |
+| XGBoost (sim-trained) | 98% | real hardware, `ibm_marrakesh` batch 10 |
 | XGBoost + reference features | 25% | real hardware, batch 2 |
-| **Nirikshak** (block alarms) | **13%** (0-8% on the other sets) | real hardware, batch 5 |
+| **Nirikshak** (block alarms) | **13%** (0-9% on the other sets) | real hardware, batch 5 |
 
-- When hardware noise happens to match the simulation (kingston batches 3-5, 1.7%; `ibm_fez`, 2.0%), the sim-trained
-  detectors work and detect slightly more per block than Nirikshak.
-- When it does not, they flag most honest blocks: 78-83% on `ibm_marrakesh` (3.6% noise floor),
-  82-88% on batch 2 (4%) and in drifted simulation. Nirikshak flags 3% on marrakesh. In the Kingston snapshot they instead miss small attacks (22-28% vs 78%).
+- When hardware noise happens to match the simulation (`ibm_kingston`, 1.6-1.8%; `ibm_fez` batch 6,
+  2.0%), the sim-trained detectors work and detect slightly more per block than Nirikshak.
+- When it does not, they flag many or most honest blocks: 32-40% on `ibm_fez` in November (2.5%),
+  78-83% on `ibm_marrakesh` batch 7 (3.6%) and 96-99% on batches 10 and 13 (4.7%), 82-88% on batch 2
+  (4.2%) and 84-88% in drifted simulation. Nirikshak flags 3-9% on those sets. In the Kingston
+  snapshot they instead miss small attacks (22-28% vs 78%).
 - Nirikshak's worst case is batch 5: 8 of 60 honest blocks, spread over 3 sessions whose
   session verdicts were all clean. Reference rounds also help ML: XGBoost with reference
   features drops from 88% to 25% worst-case false alarms.
@@ -496,6 +465,12 @@ Kingston noise snapshot and six hardware batches on three machines.
 | 5 (`dbd0vo424mrc73cki1l0`) | matched, spin echo, 21 h later | 1.8% | 1.6-2.5% |
 | 6, `ibm_fez` (`dbd104pgv2cc738h5m80`) | matched, spin echo | 2.0% | 1.8-2.0% |
 | 7, `ibm_marrakesh` (`dbd3bts24mrc73cklb10`) | matched, spin echo | 3.6% | 3.6-4.5% |
+| 8, `ibm_kingston` (`dbkpimlgg49c73djdno0`) | matched, spin echo, 12 days later | 1.7% | 1.2-1.6% |
+| 9, `ibm_fez` (`dbkpipgnceqs73amdc10`) | matched, spin echo | 2.5% | 2.2-2.9% |
+| 10, `ibm_marrakesh` (`dbkpit9kdqps7392v7mg`) | matched, spin echo | 4.7% | 3.6-5.1% |
+| 11, `ibm_kingston` (`dbkpnblgg49c73dje1h0`) | matched, spin echo, alternating order | 1.6% | 1.3-1.6% |
+| 12, `ibm_fez` (`dbkpngt6p51s73cn5fpg`) | matched, spin echo, alternating order | 2.5% | 2.4-3.0% |
+| 13, `ibm_marrakesh` (`dbkpnkdgg49c73dje2b0`) | matched, spin echo, alternating order | 4.7% | 4.4-5.8% |
 
 Batch 1's detection rates (100% everywhere) were inflated by this artifact and are not
 claimed; batches 1-2 are excluded from all pooled hardware numbers. A qubit-0 readout failure
@@ -530,11 +505,12 @@ operator integration.
 
 ### Limitations
 
-- Three backends: three usable `ibm_kingston` batches over 22 hours, one `ibm_marrakesh` and one
-  `ibm_fez` batch, 3 sessions per condition per batch.
-  Fifteen honest hardware sessions (all clean) bound the session false-alarm rate only to 0-22%; the 5% claim
-  rests on 600 simulated honest sessions.
-- Block alarms vary between sessions (up to 15% of one honest hardware session's blocks), because
+- Three backends and eleven usable batches over 13 days, but only two dates. 75 honest hardware
+  sessions (4 flagged) bound the session false-alarm rate to 1.5-13.1%; the 5% design also rests
+  on the test's exactness and on 600 simulated honest sessions.
+- Honest key rounds sit about 0.06 points above reference rounds on average, partly explained by
+  run order (see above). Order should be randomised in every run.
+- Block alarms vary between sessions (up to 25%, 5 of 20, in one honest `ibm_fez` session), because
   each session's threshold comes from 20 reference blocks. The session verdict does not have
   this problem; block intervals treat blocks as independent and are somewhat too narrow.
 - 16 rounds per shot, so attacked fractions come in steps of 1/16; shots within a binding share
@@ -544,15 +520,15 @@ operator integration.
 
 ---
 
-## Reproduce the Results
+## Reproduce the results
 
-**Checked from a clean clone (23 Oct 2026):** a fresh clone of `main` in a new virtual environment
+**Checked from a clean clone (23 Oct 2026, before batches 8-13 were added):** a fresh clone of `main` in a new virtual environment
 installed, passed all tests, ran the demo, the network monitor and the walkthrough notebook, and built
 the web app. `python -m src.main` then rewrote every file in `results/` and `web/src/results/` byte for
 byte: `git status` showed no changes. (`results/hardware_lessons.csv` is the exception that needs
 `data/raw/` from the collecting machine; it is not rewritten by `src.main`.)
 
-**Tests** (`pytest -q`, 28 tests, also run by GitHub Actions on every push):
+**Tests** (`pytest -q`, 29 tests, also run by GitHub Actions on every push):
 
 | Area | Tests | What they check |
 | :--- | :-: | :--- |
@@ -562,7 +538,7 @@ byte: `git status` showed no changes. (`results/hardware_lessons.csv` is the exc
 | Network monitor | 4 | Telemetry validation and round trip; windows close correctly; honest drift keeps the budget while an attack is caught |
 | Hardware layout | 4 | Qubits are spread out and skip excluded ones; probe ancillas are coupled; the compiled circuit uses the picked qubits; a bad qubit is flagged |
 | Detectors | 3 | Conformal false-alarm rate holds; scorecard counts; the threshold baseline |
-| Hardware batch | 2 | Key and reference circuits share qubits; timing matching gives every circuit the same slot |
+| Hardware batch | 3 | Key and reference circuits share qubits; timing matching gives every circuit the same slot; reference-first order is decoded back correctly |
 | Runtime | 1 | Aer and scikit-learn load together on Linux |
 
 The simulated and hardware datasets are committed, so everything below the hardware step runs
@@ -580,43 +556,81 @@ python scripts/make_sim_dataset.py --regimes train --seed 1 --suffix _test
 # or all of them: python -m src.main --regenerate
 ```
 
-Hardware batches (each about 10 s of quantum time; plan is free):
+Hardware batches (about 10 s of quantum time with 3 honest sessions, 15 s with 10; plan is free):
 
 ```bash
-python scripts/collect.py --batch 7                         # plan only (default backend from .env)
-python scripts/collect.py --batch 7 --backend ibm_fez --submit  # submit, returns immediately
+python scripts/collect.py --batch 14                        # plan only (default backend from .env)
+python scripts/collect.py --batch 14 --backend ibm_fez --honest-repeats 10 --order alternate --submit
 python scripts/collect.py --fetch <job_id>                  # download into data/hardware/
 python scripts/hardware_lessons.py                          # needs data/raw/ from the collecting machine
 ```
 
 ---
 
-## Hardware Budget
+## Running on IBM hardware: budget
 
 The IBM Quantum Open Plan gives 10 minutes (600 s) of quantum time per rolling 28-day
 window per account; check yours with `get_service().usage()`. Session mode is not
 available; use job or batch mode. At most 3 jobs can be queued or running at once.
 IBM's quick usage estimate is `2 + 0.00035 x executions` seconds per job; a 10-session batch
-(25,600 executions) used 10 s. Used so far: 73 s of 600 on one account. Test every
+(25,600 executions) used 10 s, a 17-session batch 15 s; all the hardware results here used 163 s. Test every
 circuit on the simulator first, and combine circuits into few large jobs.
 
 ---
 
-## Submission Checklist
+## Roadmap
 
-- [x] Repository created and **public**
-- [x] All team members added as **collaborators** and invitations accepted
-- [x] Team members listed in this README with their GitHub usernames
-- [x] Problem statement and proposed solution clearly described
-- [x] Quantum approach explained (with a diagram)
-- [x] `requirements.txt` committed with pinned versions
-- [x] `git clone` → `pip install` → run works on a clean machine
-- [x] Results table included, with a classical baseline
-- [x] Tests included and passing (`pytest -q`)
-- [x] Notebooks committed with outputs cleared (`notebooks/walkthrough.ipynb`)
-- [x] Demo video or live demo slot confirmed ([video](https://youtu.be/gO9v1e-yHNs))
-- [x] `LICENSE` file added
-- [x] Latest changes merged into `main`
+Nirikshak started as a 48-hour project. These are the open directions, roughly in order:
+
+- **More hardware data.** 75 honest hardware sessions over two dates bound the session
+  false-alarm rate to 1.5-13.1%. More batches, machines and dates would tighten it.
+- **The honest key-reference offset.** Find the cause of the 0.06-point offset (run order explains
+  part of it) and randomise the order of key and reference circuits by default.
+- **Channel calibration.** The reference rounds stay at the receiver, so they see the device's
+  noise but not the channel's. A real link needs a separate way to track honest changes in fibre
+  noise, so that a noisier fibre is not mistaken for an attack.
+- **Photonic realism.** Decoy states, detector statistics and finite-key effects, and optical
+  attacks (photon-number splitting, detector blinding) beyond the current simulated labels.
+- **Tighter block alarms.** Block thresholds rest on 20 reference blocks per session; pooling
+  reference blocks over a rolling window would steady them.
+- **Operator integration.** The network monitor reads a vendor-neutral telemetry format; the
+  next step is testing it against real link logs.
+
+Ideas and issues are welcome: open an [issue](https://github.com/dipankarchettri/nirikshak/issues).
+
+---
+
+## Contributing
+
+Contributions are welcome, from bug reports to new attacks, detectors and hardware runs. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, tests, branch and commit
+conventions, and how to share IBM hardware results. Please read the
+[Code of Conduct](CODE_OF_CONDUCT.md), and report security issues as described in
+[SECURITY.md](SECURITY.md).
+
+---
+
+## Citing Nirikshak
+
+If you use Nirikshak, its dataset or its results, please cite it. GitHub shows a
+"Cite this repository" button generated from [CITATION.cff](CITATION.cff).
+
+---
+
+## Authors and history
+
+| Name | GitHub |
+| :--- | :--- |
+| Dipankar Chettri (maintainer) | [@dipankarchettri](https://github.com/dipankarchettri) |
+| J Bhuvanesh | [@Bhuvan-esh](https://github.com/Bhuvan-esh) |
+| Anusha A | [@anusha1234-dot](https://github.com/anusha1234-dot) |
+
+Nirikshak was built by team Essential Engineers (Shridevi Institute of Engineering and
+Technology) and won the VTU Qiskit Fall Fest 2026 hackathon (Track 1, Quantum Cryptography &
+Security). The original submission is archived at
+[vtu-qiskit-fall-fest-2026/vtu-hc-essential-engineers](https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-essential-engineers);
+this repository continues it as an open-source project. The hackathon slides and design dossier
+are in [docs/hackathon/](docs/hackathon/).
 
 ---
 
@@ -625,30 +639,16 @@ circuit on the simulator first, and combine circuits into few large jobs.
 | Resource | Link |
 | :--- | :--- |
 | Demo video (4:46) | https://youtu.be/gO9v1e-yHNs |
-| Live app | https://vtu-qiskit-fall-fest-2026.github.io/vtu-hc-essential-engineers/ |
-| Slides | [docs/VTU-QFF-HC-0173.pdf](docs/VTU-QFF-HC-0173.pdf) ([PPTX](docs/VTU-QFF-HC-0173.pptx)) |
-| Git & collaboration handbook | [Git & Collaboration Handbook](../vtu-hc-guide-git-and-collaboration) |
-| Problem statements, solutions & terms | [Problem Statements, Solutions & Terms](../vtu-hc-guide-problem-and-solution) |
-| README writing guide | [README Guide & Template](../vtu-hc-guide-readme-template) |
+| Live app | https://dipankarchettri.github.io/nirikshak/ |
+| Hackathon slides | [docs/hackathon/VTU-QFF-HC-0173.pdf](docs/hackathon/VTU-QFF-HC-0173.pdf) |
+| Original design dossier | [docs/hackathon/PROJECT.md](docs/hackathon/PROJECT.md) |
 | Qiskit documentation | https://docs.quantum.ibm.com/ |
 | Qiskit Runtime & primitives | https://quantum.cloud.ibm.com/docs/ |
 | Qiskit Aer simulator | https://docs.quantum.ibm.com/guides/simulator |
 | IBM Quantum Platform | https://quantum.cloud.ibm.com/ |
-| Full design document | [PROJECT.md](PROJECT.md) |
 
 ---
 
 ## License
 
-Released under the [MIT License](LICENSE). See `LICENSE` for details.
-
----
-
-<div align="center">
-
-**Essential Engineers** · Team ID `VTU-QFF-HC-0173` · Tier `Both`
-· Built with Qiskit for the VTU-QFF Hackathon
-
-[Back to Top](#essential-engineers-nirikshak)
-
-</div>
+Released under the [MIT License](LICENSE).

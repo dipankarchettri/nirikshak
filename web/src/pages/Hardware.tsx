@@ -156,7 +156,7 @@ export default function Hardware() {
           <h2 className="title">Which blocks gave Eve away</h2>
           <p className="note">
             A block is 8 random settings of 16 rounds, about 512 sifted bits. Each key block is compared with a threshold
-            set from that session's 20 reference blocks. Bars pool the three batches; whiskers are exact 95% intervals.
+            set from that session's 20 reference blocks. Bars pool the {echo.length} spin-echo batches; whiskers are exact 95% intervals.
           </p>
         </div>
         <div className="body">
