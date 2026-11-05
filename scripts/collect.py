@@ -44,8 +44,9 @@ def plan(args):
         from nirikshak.hardware import get_service
         service = get_service()
         backend = service.backend(args.backend)
+    ref_first = [args.order == "alternate" and i % 2 == 1 for i in range(len(sessions))]
     pubs, layouts, slot_dt = compile_sessions(sessions, backend, exclude=args.exclude, seed=args.batch,
-                                              timing=args.timing)
+                                              timing=args.timing, ref_first=ref_first)
     shots = {s.spec.shots for s in sessions}
     assert len(shots) == 1, "all sessions in a job must use the same shots"
     n_exec = sum(s.spec.executions for s in sessions)
@@ -53,11 +54,11 @@ def plan(args):
           f"| IBM quick estimate {estimate_seconds(n_exec):.1f} s | slot {slot_dt} dt ({slot_dt * backend.target.dt * 1e6:.2f} us)")
     for s, lay in zip(sessions, layouts):
         print(f"  seed {s.spec.seed:6d}  {s.spec.attack:17s} fraction {s.attacked_fraction:.4f}  qubits {lay}")
-    return sessions, pubs, layouts, backend, service, shots.pop(), n_exec, slot_dt
+    return sessions, pubs, layouts, backend, service, shots.pop(), n_exec, slot_dt, ref_first
 
 
 def submit(args):
-    sessions, pubs, layouts, backend, service, shots, n_exec, slot_dt = plan(args)
+    sessions, pubs, layouts, backend, service, shots, n_exec, slot_dt, ref_first = plan(args)
     est = estimate_seconds(n_exec)
     if service is not None:
         remaining = service.usage().get("usage_remaining_seconds")
@@ -82,6 +83,7 @@ def submit(args):
     meta = {"job_id": job_id, "backend": backend.name, "batch": args.batch, "fake": args.fake,
             "submitted": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "shots": shots, "executions": n_exec,
             "estimate_seconds": est, "exclude": args.exclude, "layouts": layouts, "slot_dt": slot_dt, "timing": args.timing,
+            "ref_first": ref_first,
             "specs": specs_to_json(sessions),
             "calibration_at_submit": calibration_snapshot(backend, sorted({q for l in layouts for q in l}))}
     RAW.mkdir(parents=True, exist_ok=True)
@@ -96,7 +98,8 @@ def submit(args):
 
 def save_results(meta, sessions, result, usage, backend):
     regime = "fake_kingston" if meta.get("fake") else "hardware"
-    table, bits = decode(sessions, result, meta["layouts"], job_id=meta["job_id"], batch=meta["batch"],
+    table, bits = decode(sessions, result, meta["layouts"], ref_first=meta.get("ref_first"),
+                         job_id=meta["job_id"], batch=meta["batch"],
                          backend_name=meta["backend"], regime=regime, submitted=meta["submitted"],
                          slot_dt=meta.get("slot_dt", 0),
                          timing=meta.get("timing", "delay" if meta.get("slot_dt") else "none"))
@@ -144,6 +147,8 @@ def main():
     ap.add_argument("--exclude", type=int, nargs="*", default=[], help="physical qubits to avoid")
     ap.add_argument("--timing", choices=["echo", "delay", "none"], default="echo",
                     help="echo (default): matched slot with spin echo; delay: batch 2; none: batch 1")
+    ap.add_argument("--order", choices=["key-first", "alternate"], default="key-first",
+                    help="PUB order per session; alternate runs the reference first in every second session")
     ap.add_argument("--max-seconds", type=float, default=60, help="refuse to submit above this estimate")
     args = ap.parse_args()
     if args.backend is None:

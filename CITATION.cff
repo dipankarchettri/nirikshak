@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use Nirikshak, please cite it as below."
+title: "Nirikshak: drift-robust eavesdropper detection for BB84 quantum key distribution"
+type: software
+authors:
+  - given-names: Dipankar
+    family-names: Chettri
+  - given-names: Bhuvanesh
+    family-names: J
+  - given-names: Anusha
+    family-names: A
+repository-code: "https://github.com/dipankarchettri/nirikshak"
+url: "https://dipankarchettri.github.io/nirikshak/"
+license: MIT
+version: 0.1.0
+date-released: 2026-10-23
+keywords:
+  - quantum key distribution
+  - BB84
+  - eavesdropper detection
+  - conformal prediction
+  - permutation test
+  - Qiskit
+  - IBM Quantum
