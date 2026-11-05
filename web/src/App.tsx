@@ -11,7 +11,7 @@ const PAGES = [
   { path: 'how', label: 'How it works', el: How },
 ]
 
-const REPO = 'https://github.com/vtu-qiskit-fall-fest-2026/vtu-hc-essential-engineers'
+const REPO = 'https://github.com/dipankarchettri/nirikshak'
 
 function useRoute() {
   const get = () => window.location.hash.replace(/^#\/?/, '')
@@ -63,7 +63,7 @@ export default function App() {
       </main>
       <footer>
         <div className="wrap">
-          <span>Nirikshak means inspector. Built by Essential Engineers for Qiskit Fall Fest 2026, Track 1.</span>
+          <span>Nirikshak means inspector. Open source under the MIT License; started at Qiskit Fall Fest 2026.</span>
           <a href={REPO}>Code, data and how to reproduce every number</a>
         </div>
       </footer>
