@@ -19,11 +19,13 @@ TIMING_MODES = ("echo", "delay", "none")
 
 
 def compile_sessions(sessions: list[Session], backend, exclude=(), seed: int | None = None,
-                     timing: str = "echo"):
+                     timing: str = "echo", ref_first: list[bool] | None = None):
     """Returns (pubs, layouts, slot_dt). Key and reference circuits of a session share the same
     signal qubits. With timing "echo" or "delay", every circuit gets the same slot duration slot_dt
     (the longest attack's slot); qubits Eve does not touch idle for exactly slot_dt, as a spin echo
-    or a plain delay. "none" reproduces batch 1 (no timing match)."""
+    or a plain delay. "none" reproduces batch 1 (no timing match).
+    ref_first[i] puts session i's reference PUB before its key PUB (default: key first), so the
+    execution order of key and reference can be varied between sessions."""
     if timing not in TIMING_MODES:
         raise ValueError(f"timing must be one of {TIMING_MODES}")
     layouts_full = [pick_layout(backend, s.key, exclude=exclude) for s in sessions]
@@ -47,8 +49,9 @@ def compile_sessions(sessions: list[Session], backend, exclude=(), seed: int | N
             raise RuntimeError("key and reference circuits landed on different qubits")
         if timing != "none" and not slot_duration(key_isa, backend) == slot_duration(ref_isa, backend) == slot_dt:
             raise RuntimeError("timing match failed")
-        pubs += [(key_isa, key_t.parameter_values(s.key_rounds)),
-                 (ref_isa, ref_t.parameter_values(s.ref_rounds))]
+        pair = [(key_isa, key_t.parameter_values(s.key_rounds)),
+                (ref_isa, ref_t.parameter_values(s.ref_rounds))]
+        pubs += pair[::-1] if ref_first and ref_first[len(layouts)] else pair
         layouts.append(signal_qubits(key_isa, n))
     return pubs, layouts, slot_dt
 
@@ -71,14 +74,18 @@ def rounds_arrays(sessions: list[Session]) -> dict[str, np.ndarray]:
     return out
 
 
-def decode(sessions: list[Session], result, layouts: list[list[int]], **context) -> tuple[pd.DataFrame, dict]:
-    """Sampler result (2 PUBs per session) -> block table, plus raw bit arrays."""
+def decode(sessions: list[Session], result, layouts: list[list[int]], ref_first: list[bool] | None = None,
+           **context) -> tuple[pd.DataFrame, dict]:
+    """Sampler result (2 PUBs per session, in the order compile_sessions used) -> block table, plus
+    raw bit arrays. Each block row records whether its session ran the reference PUB first."""
     tables, bits = [], {}
     for i, s in enumerate(sessions):
-        key_bob = bits_to_array(result[2 * i].data.bob)
-        ref_bob = bits_to_array(result[2 * i + 1].data.bob)
+        first = bool(ref_first[i]) if ref_first else False
+        k, r = (2 * i + 1, 2 * i) if first else (2 * i, 2 * i + 1)
+        key_bob = bits_to_array(result[k].data.bob)
+        ref_bob = bits_to_array(result[r].data.bob)
         bits[f"{i}_key_bob"], bits[f"{i}_ref_bob"] = key_bob, ref_bob
         sid = f"{context.get('job_id', 'local')}:{i}"
-        tables.append(session_table(s, key_bob, ref_bob, session_id=sid,
+        tables.append(session_table(s, key_bob, ref_bob, session_id=sid, ref_first=first,
                                     qubits=",".join(map(str, layouts[i])), **context))
     return pd.concat(tables, ignore_index=True), bits

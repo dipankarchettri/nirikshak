@@ -26,3 +26,33 @@ def test_timing_match_gives_every_circuit_the_same_slot():
         assert {slot_duration(isa, backend) for isa, _ in pubs} == {slot_dt}
         n_x = sum(1 for inst in pubs[1][0].data if inst.operation.name == "x")  # reference circuit
         assert n_x == (32 if timing == "echo" else 0)  # two echo pulses on each of 16 qubits
+
+
+def test_reference_first_order_is_decoded_back_to_key_and_reference():
+    from types import SimpleNamespace
+
+    import numpy as np
+
+    from nirikshak.hardware.batch import decode
+
+    sessions = [build_session(SessionSpec(attack=a, fraction=f, key_blocks=2, ref_blocks=2, block_size=2, seed=i))
+                for i, (a, f) in enumerate([("none", 0.0), ("intercept_resend", 0.5)])]
+    pubs, layouts, _ = compile_sessions(sessions, FakeKingston(), timing="none", seed=1, ref_first=[False, True])
+    eve = [any(inst.operation.name == "measure" and inst.clbits[0]._register.name != "bob" for inst in isa.data)
+           for isa, _ in pubs]
+    assert eve == [False, False, False, True]  # session 1: reference PUB, then the attacked key PUB
+
+    class Bits:  # stands in for a BitArray: all-zero or all-one outcomes mark which PUB is which
+        def __init__(self, value, shape):
+            self.a = np.full(shape, value)
+
+        def to_bool_array(self, order):
+            return self.a
+
+    shape = (sessions[0].key_rounds.alice_bits.shape[0], sessions[0].spec.shots, 16)
+    marks = [True, False, False, True]  # key PUBs all ones, reference PUBs all zeros
+    result = [SimpleNamespace(data=SimpleNamespace(bob=Bits(m, shape))) for m in marks]
+    table, bits = decode(sessions, result, layouts, ref_first=[False, True])
+    for i in range(2):
+        assert bits[f"{i}_key_bob"].all() and not bits[f"{i}_ref_bob"].any()
+    assert table.groupby("session_id").ref_first.first().tolist() == [False, True]
